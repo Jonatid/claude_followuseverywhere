@@ -42,46 +42,44 @@ const mockBusinesses = [
 // ============================================
 const LandingPage = ({ onNavigate }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8 md:p-12">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Follow Us Everywhere
-          </h1>
-          <p className="text-xl text-gray-600 mb-2">
+    <div className="screen screen--purple-blue">
+      <div className="card card--wide">
+        <div className="landing-header">
+          <h1 className="landing-title">Follow Us Everywhere</h1>
+          <p className="landing-subtitle">
             One link to connect customers to all your social pages.
           </p>
-          <p className="text-gray-500">
+          <p className="landing-description">
             Get your custom link and QR code in minutes.
           </p>
         </div>
-        
-        <div className="space-y-4">
+
+        <div className="stack">
           <button
             onClick={() => onNavigate('signup')}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors text-lg"
+            className="button button--primary button--large"
           >
             Create Your Follow Hub
           </button>
-          
+
           <button
             onClick={() => onNavigate('login')}
-            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-4 px-6 rounded-lg transition-colors"
+            className="button button--secondary button--large"
           >
             Business Login
           </button>
-          
-          <div className="pt-4 border-t">
-            <p className="text-sm text-gray-500 text-center mb-3">View sample business pages:</p>
-            <div className="space-y-2">
+
+          <div className="section-divider">
+            <p className="section-title">View sample business pages:</p>
+            <div className="stack stack--small">
               {mockBusinesses.map(business => (
                 <button
                   key={business.id}
                   onClick={() => onNavigate('public', business.id)}
-                  className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 px-4 rounded-lg transition-colors text-left flex items-center justify-between"
+                  className="button button--soft button--sample"
                 >
                   <span>{business.name}</span>
-                  <span className="text-sm text-blue-500">→</span>
+                  <span className="button-arrow">→</span>
                 </button>
               ))}
             </div>
@@ -118,7 +116,7 @@ const BusinessSignup = ({ onNavigate, onSignup }) => {
       alert('Please fill in all required fields');
       return;
     }
-    
+
     const newBusiness = {
       id: Date.now(),
       name: formData.businessName,
@@ -136,105 +134,105 @@ const BusinessSignup = ({ onNavigate, onSignup }) => {
         { platform: "Website", url: "", icon: "🌐" }
       ]
     };
-    
+
     onSignup(newBusiness);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+    <div className="screen screen--purple-blue">
+      <div className="card card--medium">
         <button
           onClick={() => onNavigate('landing')}
-          className="text-gray-600 hover:text-gray-700 mb-4 text-sm"
+          className="text-link text-link--muted"
         >
           ← Back
         </button>
-        
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Your Follow Hub</h1>
-          <p className="text-gray-600">Get started in under 2 minutes</p>
+
+        <div className="card-header">
+          <h1 className="heading-lg">Create Your Follow Hub</h1>
+          <p className="text-muted">Get started in under 2 minutes</p>
         </div>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+
+        <div className="stack">
+          <div className="form-field">
+            <label className="form-label">
               Business Name *
             </label>
             <input
               type="text"
               value={formData.businessName}
               onChange={(e) => handleChange('businessName', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="form-input"
               placeholder="e.g., Joe's Coffee Shop"
             />
           </div>
-          
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+
+          <div className="form-field">
+            <label className="form-label">
               Your Custom Link
             </label>
-            <div className="flex items-center">
-              <span className="text-gray-500 text-sm mr-2">followuseverywhere.app/</span>
+            <div className="slug-row">
+              <span className="slug-prefix">followuseverywhere.app/</span>
               <input
                 type="text"
                 value={formData.slug}
                 onChange={(e) => handleChange('slug', e.target.value)}
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="form-input slug-input"
                 placeholder="yourname"
               />
             </div>
           </div>
-          
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+
+          <div className="form-field">
+            <label className="form-label">
               Tagline (Optional)
             </label>
             <input
               type="text"
               value={formData.tagline}
               onChange={(e) => handleChange('tagline', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="form-input"
               placeholder="e.g., Best Coffee in Town"
             />
           </div>
-          
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+
+          <div className="form-field">
+            <label className="form-label">
               Email *
             </label>
             <input
               type="email"
               value={formData.email}
               onChange={(e) => handleChange('email', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="form-input"
               placeholder="you@business.com"
             />
           </div>
-          
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+
+          <div className="form-field">
+            <label className="form-label">
               Password *
             </label>
             <input
               type="password"
               value={formData.password}
               onChange={(e) => handleChange('password', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="form-input"
               placeholder="Create a password"
             />
           </div>
-          
+
           <button
             onClick={handleSubmit}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="button button--primary"
           >
             Create Account & Continue
           </button>
         </div>
-        
-        <p className="text-center text-sm text-gray-500 mt-4">
+
+        <p className="helper-text">
           Already have an account?{' '}
-          <button onClick={() => onNavigate('login')} className="text-purple-600 hover:text-purple-700 font-semibold">
+          <button onClick={() => onNavigate('login')} className="text-link">
             Login
           </button>
         </p>
@@ -252,7 +250,7 @@ const BusinessLogin = ({ onNavigate, businesses, onLogin }) => {
 
   const handleSubmit = () => {
     const business = businesses.find(b => b.email === email);
-    
+
     if (business) {
       onLogin(business);
     } else {
@@ -261,64 +259,64 @@ const BusinessLogin = ({ onNavigate, businesses, onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+    <div className="screen screen--purple-blue">
+      <div className="card card--medium">
         <button
           onClick={() => onNavigate('landing')}
-          className="text-gray-600 hover:text-gray-700 mb-4 text-sm"
+          className="text-link text-link--muted"
         >
           ← Back
         </button>
-        
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Business Login</h1>
-          <p className="text-gray-600">Access your dashboard</p>
+
+        <div className="card-header">
+          <h1 className="heading-lg">Business Login</h1>
+          <p className="text-muted">Access your dashboard</p>
         </div>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+
+        <div className="stack">
+          <div className="form-field">
+            <label className="form-label">
               Email
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="form-input"
               placeholder="you@business.com"
             />
           </div>
-          
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+
+          <div className="form-field">
+            <label className="form-label">
               Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="form-input"
               placeholder="Enter your password"
             />
           </div>
-          
+
           <button
             onClick={handleSubmit}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="button button--primary"
           >
             Login
           </button>
         </div>
-        
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-gray-600 mb-2">Demo credentials:</p>
-          <p className="text-xs text-gray-500">hello@coffeespot.com</p>
-          <p className="text-xs text-gray-500">info@barberstudio.com</p>
+
+        <div className="note-card">
+          <p className="note-title">Demo credentials:</p>
+          <p className="note-text">hello@coffeespot.com</p>
+          <p className="note-text">info@barberstudio.com</p>
         </div>
-        
-        <p className="text-center text-sm text-gray-500 mt-4">
+
+        <p className="helper-text">
           Don't have an account?{' '}
-          <button onClick={() => onNavigate('signup')} className="text-purple-600 hover:text-purple-700 font-semibold">
+          <button onClick={() => onNavigate('signup')} className="text-link">
             Sign up
           </button>
         </p>
@@ -356,68 +354,68 @@ const BusinessDashboard = ({ business, onNavigate, onUpdateBusiness }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+    <div className="dashboard-shell">
+      <div className="dashboard-container">
+        <div className="dashboard-card">
+          <div className="dashboard-header">
+            <h1 className="heading-xl">Dashboard</h1>
             <button
               onClick={handleLogout}
-              className="text-gray-600 hover:text-gray-700 text-sm font-semibold"
+              className="text-link text-link--muted"
             >
               Logout
             </button>
           </div>
-          
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{business.name}</h2>
-            <p className="text-gray-600">{business.tagline}</p>
+
+          <div className="dashboard-summary">
+            <h2 className="heading-md">{business.name}</h2>
+            <p className="text-muted">{business.tagline}</p>
           </div>
-          
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
-            <p className="text-sm text-gray-600 mb-2">Your Follow Us Everywhere link:</p>
-            <div className="flex items-center gap-2 flex-wrap">
-              <code className="flex-1 bg-white px-3 py-2 rounded border text-sm min-w-0">
+
+          <div className="link-panel">
+            <p className="text-muted">Your Follow Us Everywhere link:</p>
+            <div className="link-row">
+              <code className="link-code">
                 https://followuseverywhere.app/{business.slug}
               </code>
               <button
                 onClick={handleCopyLink}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm font-semibold whitespace-nowrap"
+                className="button button--primary button--compact"
               >
                 Copy Link
               </button>
             </div>
           </div>
-          
+
           <button
             onClick={() => onNavigate('public', business.id)}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg mb-6"
+            className="button button--blue"
           >
             Preview Public Follow Page
           </button>
-          
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Your Social Profiles</h2>
-          
-          <div className="space-y-3">
+
+          <h2 className="heading-md heading-md--spaced">Your Social Profiles</h2>
+
+          <div className="stack stack--small">
             {business.socials.map((social, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{social.icon}</span>
-                    <span className="font-semibold">{social.platform}</span>
+              <div key={index} className="social-card">
+                <div className="social-card__header">
+                  <div className="social-card__platform">
+                    <span className="social-icon">{social.icon}</span>
+                    <span className="social-name">{social.platform}</span>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="social-card__actions">
                     {editingIndex === index ? (
                       <>
                         <button
                           onClick={() => handleSave(index)}
-                          className="text-green-600 hover:text-green-700 text-sm font-semibold"
+                          className="text-link text-link--success"
                         >
                           Save
                         </button>
                         <button
                           onClick={() => setEditingIndex(null)}
-                          className="text-gray-600 hover:text-gray-700 text-sm font-semibold"
+                          className="text-link text-link--muted"
                         >
                           Cancel
                         </button>
@@ -425,24 +423,24 @@ const BusinessDashboard = ({ business, onNavigate, onUpdateBusiness }) => {
                     ) : (
                       <button
                         onClick={() => handleEdit(index)}
-                        className="text-purple-600 hover:text-purple-700 text-sm font-semibold"
+                        className="text-link text-link--accent"
                       >
                         Edit
                       </button>
                     )}
                   </div>
                 </div>
-                
+
                 {editingIndex === index ? (
                   <input
                     type="text"
                     value={tempUrl}
                     onChange={(e) => setTempUrl(e.target.value)}
-                    className="w-full border rounded px-3 py-2 text-sm"
+                    className="form-input form-input--compact"
                     placeholder={`https://${social.platform.toLowerCase()}.com/yourhandle`}
                   />
                 ) : (
-                  <p className="text-sm text-gray-600 truncate">
+                  <p className="social-link">
                     {social.url || `Add your ${social.platform} link`}
                   </p>
                 )}
@@ -471,58 +469,58 @@ const PublicFollowPage = ({ business, onNavigate }) => {
   const activeSocials = business.socials.filter(s => s.url);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+    <div className="screen screen--blue-purple">
+      <div className="card card--medium">
         <button
           onClick={() => onNavigate('landing')}
-          className="text-gray-600 hover:text-gray-700 mb-4 text-sm"
+          className="text-link text-link--muted"
         >
           ← Back
         </button>
-        
-        <div className="text-center mb-8">
-          <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
+
+        <div className="card-header">
+          <div className="logo-circle">
             {business.logo}
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{business.name}</h1>
-          <p className="text-gray-600 mb-4">{business.tagline}</p>
-          <p className="text-sm text-gray-500">Follow this business everywhere in two taps.</p>
+          <h1 className="heading-lg">{business.name}</h1>
+          <p className="text-muted">{business.tagline}</p>
+          <p className="helper-text">Follow this business everywhere in two taps.</p>
         </div>
-        
+
         {activeSocials.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="empty-state">
             <p>This business hasn't added their social links yet.</p>
           </div>
         ) : (
           <>
-            <div className="space-y-3 mb-6">
-              {business.socials.map((social, index) => 
+            <div className="stack stack--small">
+              {business.socials.map((social, index) =>
                 social.url ? (
                   <button
                     key={index}
                     onClick={() => handlePlatformClick(social.platform, social.url)}
-                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-4 rounded-lg flex items-center justify-between transition-colors"
+                    className="button button--ghost"
                   >
-                    <span className="flex items-center gap-3">
-                      <span className="text-2xl">{social.icon}</span>
+                    <span className="button__content">
+                      <span className="social-icon">{social.icon}</span>
                       <span>
-                        {social.platform === 'YouTube' ? 'Subscribe on' : 
+                        {social.platform === 'YouTube' ? 'Subscribe on' :
                          social.platform === 'Facebook' ? 'Like on' :
                          social.platform === 'LinkedIn' ? 'Connect on' :
                          social.platform === 'Website' ? 'Visit' :
                          'Follow on'} {social.platform}
                       </span>
                     </span>
-                    <span className="text-gray-400">→</span>
+                    <span className="button-arrow muted-arrow">→</span>
                   </button>
                 ) : null
               )}
             </div>
-            
+
             {activeSocials.length > 1 && (
               <button
                 onClick={() => onNavigate('progress', business.id)}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-lg text-lg shadow-lg transition-all"
+                className="button button--gradient button--large"
               >
                 Follow Us Everywhere
               </button>
@@ -557,34 +555,32 @@ const FollowProgressPage = ({ business, onNavigate }) => {
   }, [onNavigate, activeSocials.length, business.id]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+    <div className="screen screen--purple-blue">
+      <div className="card card--medium">
+        <div className="card-header">
+          <div className="spinner"></div>
+          <h1 className="heading-md">
             Connecting you to {business.name}...
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted">
             We're opening your apps so you can follow and subscribe.
           </p>
         </div>
-        
-        <div className="space-y-3">
+
+        <div className="stack stack--small">
           {activeSocials.map((social, index) => (
             <div
               key={index}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                index < progress ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'
-              }`}
+              className={`progress-item ${index < progress ? 'progress-item--active' : ''}`}
             >
-              <span className="text-2xl">{social.icon}</span>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900">{social.platform}</p>
-                <p className="text-sm text-gray-600">
+              <span className="social-icon">{social.icon}</span>
+              <div className="progress-item__details">
+                <p className="progress-item__title">{social.platform}</p>
+                <p className="progress-item__status">
                   {index < progress ? 'Opened!' : 'Opening profile...'}
                 </p>
               </div>
-              {index < progress && <span className="text-green-600 text-xl">✓</span>}
+              {index < progress && <span className="progress-check">✓</span>}
             </div>
           ))}
         </div>
@@ -598,21 +594,21 @@ const FollowProgressPage = ({ business, onNavigate }) => {
 // ============================================
 const FollowSuccessPage = ({ business, onNavigate }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-        <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center text-white text-5xl mx-auto mb-6">
+    <div className="screen screen--green-blue">
+      <div className="card card--medium card--center">
+        <div className="success-icon">
           ✓
         </div>
-        
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Success!</h1>
-        
-        <p className="text-lg text-gray-600 mb-8">
-          You're now connected to <span className="font-semibold">{business.name}</span> on the platforms you chose.
+
+        <h1 className="heading-lg">Success!</h1>
+
+        <p className="success-message">
+          You're now connected to <span className="text-strong">{business.name}</span> on the platforms you chose.
         </p>
-        
+
         <button
           onClick={() => onNavigate('public', business.id)}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          className="button button--blue"
         >
           Back to Follow Page
         </button>
@@ -649,7 +645,7 @@ export default function App() {
   };
 
   const handleUpdateBusiness = (updatedBusiness) => {
-    setBusinesses(prev => 
+    setBusinesses(prev =>
       prev.map(b => b.id === updatedBusiness.id ? updatedBusiness : b)
     );
   };
@@ -666,8 +662,8 @@ export default function App() {
         return <BusinessLogin onNavigate={handleNavigate} businesses={businesses} onLogin={handleLogin} />;
       case 'dashboard':
         return currentBusiness ? (
-          <BusinessDashboard 
-            business={currentBusiness} 
+          <BusinessDashboard
+            business={currentBusiness}
             onNavigate={handleNavigate}
             onUpdateBusiness={handleUpdateBusiness}
           />
