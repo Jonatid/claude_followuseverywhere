@@ -1,46 +1,16 @@
-import React, { useState } from 'react';
-
-// ============================================
-// MOCK DATA - Multiple Businesses
-// ============================================
-const mockBusinesses = [
-  {
-    id: 1,
-    name: "CoffeeSpot Detroit",
-    slug: "coffeespot",
-    tagline: "Detroit's Best Coffee",
-    logo: "CD",
-    email: "hello@coffeespot.com",
-    socials: [
-      { platform: "Instagram", url: "https://instagram.com/coffeespot", icon: "📷" },
-      { platform: "TikTok", url: "https://tiktok.com/@coffeespot", icon: "🎵" },
-      { platform: "YouTube", url: "https://youtube.com/@coffeespot", icon: "▶️" },
-      { platform: "Facebook", url: "https://facebook.com/coffeespot", icon: "👍" },
-      { platform: "X", url: "https://x.com/coffeespot", icon: "✖️" },
-      { platform: "LinkedIn", url: "https://linkedin.com/company/coffeespot", icon: "💼" },
-      { platform: "Website", url: "https://coffeespot.com", icon: "🌐" }
-    ]
-  },
-  {
-    id: 2,
-    name: "Barber Studio NYC",
-    slug: "barberstudio",
-    tagline: "Classic Cuts, Modern Style",
-    logo: "BS",
-    email: "info@barberstudio.com",
-    socials: [
-      { platform: "Instagram", url: "https://instagram.com/barberstudio", icon: "📷" },
-      { platform: "TikTok", url: "https://tiktok.com/@barberstudio", icon: "🎵" },
-      { platform: "Facebook", url: "https://facebook.com/barberstudio", icon: "👍" },
-      { platform: "Website", url: "https://barberstudio.com", icon: "🌐" }
-    ]
-  }
-];
+import React, { useEffect, useState } from 'react';
+import {
+  getBusinessBySlug,
+  getMe,
+  login,
+  signup,
+  updateSocials,
+} from './services/api';
 
 // ============================================
 // LANDING PAGE
 // ============================================
-const LandingPage = ({ onNavigate }) => {
+const LandingPage = ({ onNavigate, sampleBusinesses }) => {
   return (
     <div className="screen screen--purple-blue">
       <div className="card card--wide">
@@ -72,16 +42,20 @@ const LandingPage = ({ onNavigate }) => {
           <div className="section-divider">
             <p className="section-title">View sample business pages:</p>
             <div className="stack stack--small">
-              {mockBusinesses.map(business => (
-                <button
-                  key={business.id}
-                  onClick={() => onNavigate('public', business.id)}
-                  className="button button--soft button--sample"
-                >
-                  <span>{business.name}</span>
-                  <span className="button-arrow">→</span>
-                </button>
-              ))}
+              {sampleBusinesses.length > 0 ? (
+                sampleBusinesses.map((business) => (
+                  <button
+                    key={business.slug}
+                    onClick={() => onNavigate('public', business.slug)}
+                    className="button button--soft button--sample"
+                  >
+                    <span>{business.name}</span>
+                    <span className="button-arrow">→</span>
+                  </button>
+                ))
+              ) : (
+                <p className="text-muted">Sample pages will appear here once available.</p>
+              )}
             </div>
           </div>
         </div>
@@ -111,31 +85,29 @@ const BusinessSignup = ({ onNavigate, onSignup }) => {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.businessName || !formData.email || !formData.password) {
       alert('Please fill in all required fields');
       return;
     }
 
-    const newBusiness = {
-      id: Date.now(),
-      name: formData.businessName,
-      slug: formData.slug,
-      tagline: formData.tagline,
-      logo: formData.businessName.substring(0, 2).toUpperCase(),
-      email: formData.email,
-      socials: [
-        { platform: "Instagram", url: "", icon: "📷" },
-        { platform: "TikTok", url: "", icon: "🎵" },
-        { platform: "YouTube", url: "", icon: "▶️" },
-        { platform: "Facebook", url: "", icon: "👍" },
-        { platform: "X", url: "", icon: "✖️" },
-        { platform: "LinkedIn", url: "", icon: "💼" },
-        { platform: "Website", url: "", icon: "🌐" }
-      ]
-    };
-
-    onSignup(newBusiness);
+    try {
+      const response = await signup({
+        name: formData.businessName,
+        slug: formData.slug,
+        tagline: formData.tagline,
+        email: formData.email,
+        password: formData.password,
+      });
+      const { token } = response.data;
+      localStorage.setItem('token', token);
+      const meResponse = await getMe();
+      onSignup({ token, business: meResponse.data });
+      alert('Account created successfully! Add your social links to get started.');
+    } catch (error) {
+      const message = error.response?.data?.message || 'Signup failed. Please try again.';
+      alert(message);
+    }
   };
 
   return (
@@ -244,17 +216,19 @@ const BusinessSignup = ({ onNavigate, onSignup }) => {
 // ============================================
 // BUSINESS LOGIN
 // ============================================
-const BusinessLogin = ({ onNavigate, businesses, onLogin }) => {
+const BusinessLogin = ({ onNavigate, onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = () => {
-    const business = businesses.find(b => b.email === email);
-
-    if (business) {
-      onLogin(business);
-    } else {
-      alert('Business not found. Try hello@coffeespot.com for demo.');
+  const handleSubmit = async () => {
+    try {
+      const response = await login({ email, password });
+      const { token, business } = response.data;
+      localStorage.setItem('token', token);
+      onLogin({ token, business });
+    } catch (error) {
+      const message = error.response?.data?.message || 'Login failed. Please try again.';
+      alert(message);
     }
   };
 
@@ -308,12 +282,6 @@ const BusinessLogin = ({ onNavigate, businesses, onLogin }) => {
           </button>
         </div>
 
-        <div className="note-card">
-          <p className="note-title">Demo credentials:</p>
-          <p className="note-text">hello@coffeespot.com</p>
-          <p className="note-text">info@barberstudio.com</p>
-        </div>
-
         <p className="helper-text">
           Don't have an account?{' '}
           <button onClick={() => onNavigate('signup')} className="text-link">
@@ -328,9 +296,10 @@ const BusinessLogin = ({ onNavigate, businesses, onLogin }) => {
 // ============================================
 // BUSINESS DASHBOARD
 // ============================================
-const BusinessDashboard = ({ business, onNavigate, onUpdateBusiness }) => {
+const BusinessDashboard = ({ business, onNavigate, onUpdateBusiness, onLogout }) => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [tempUrl, setTempUrl] = useState('');
+  const socials = business.socials || [];
 
   const handleCopyLink = () => {
     alert('Link copied to clipboard!');
@@ -338,18 +307,30 @@ const BusinessDashboard = ({ business, onNavigate, onUpdateBusiness }) => {
 
   const handleEdit = (index) => {
     setEditingIndex(index);
-    setTempUrl(business.socials[index].url);
+    setTempUrl(socials[index].url);
   };
 
-  const handleSave = (index) => {
-    const updatedSocials = [...business.socials];
+  const handleSave = async (index) => {
+    const updatedSocials = [...socials];
     updatedSocials[index] = { ...updatedSocials[index], url: tempUrl };
-    onUpdateBusiness({ ...business, socials: updatedSocials });
-    setEditingIndex(null);
-    alert('Link updated!');
+    try {
+      const response = await updateSocials(
+        updatedSocials.map((social, display_order) => ({
+          ...social,
+          display_order,
+        }))
+      );
+      onUpdateBusiness({ ...business, socials: response.data });
+      setEditingIndex(null);
+      alert('Link updated!');
+    } catch (error) {
+      const message = error.response?.data?.message || 'Unable to update social link.';
+      alert(message);
+    }
   };
 
   const handleLogout = () => {
+    onLogout();
     onNavigate('landing');
   };
 
@@ -388,7 +369,7 @@ const BusinessDashboard = ({ business, onNavigate, onUpdateBusiness }) => {
           </div>
 
           <button
-            onClick={() => onNavigate('public', business.id)}
+            onClick={() => onNavigate('public', business.slug)}
             className="button button--blue"
           >
             Preview Public Follow Page
@@ -397,7 +378,7 @@ const BusinessDashboard = ({ business, onNavigate, onUpdateBusiness }) => {
           <h2 className="heading-md heading-md--spaced">Your Social Profiles</h2>
 
           <div className="stack stack--small">
-            {business.socials.map((social, index) => (
+            {socials.map((social, index) => (
               <div key={index} className="social-card">
                 <div className="social-card__header">
                   <div className="social-card__platform">
@@ -466,7 +447,8 @@ const PublicFollowPage = ({ business, onNavigate }) => {
     window.open(url, '_blank');
   };
 
-  const activeSocials = business.socials.filter(s => s.url);
+  const socials = business.socials || [];
+  const activeSocials = socials.filter(s => s.url);
 
   return (
     <div className="screen screen--blue-purple">
@@ -494,7 +476,7 @@ const PublicFollowPage = ({ business, onNavigate }) => {
         ) : (
           <>
             <div className="stack stack--small">
-              {business.socials.map((social, index) =>
+              {socials.map((social, index) =>
                 social.url ? (
                   <button
                     key={index}
@@ -519,7 +501,7 @@ const PublicFollowPage = ({ business, onNavigate }) => {
 
             {activeSocials.length > 1 && (
               <button
-                onClick={() => onNavigate('progress', business.id)}
+                onClick={() => onNavigate('progress')}
                 className="button button--gradient button--large"
               >
                 Follow Us Everywhere
@@ -537,11 +519,11 @@ const PublicFollowPage = ({ business, onNavigate }) => {
 // ============================================
 const FollowProgressPage = ({ business, onNavigate }) => {
   const [progress, setProgress] = useState(0);
-  const activeSocials = business.socials.filter(s => s.url);
+  const activeSocials = (business.socials || []).filter(s => s.url);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      onNavigate('success', business.id);
+      onNavigate('success');
     }, 2500);
 
     const interval = setInterval(() => {
@@ -607,7 +589,7 @@ const FollowSuccessPage = ({ business, onNavigate }) => {
         </p>
 
         <button
-          onClick={() => onNavigate('public', business.id)}
+          onClick={() => onNavigate('public', business.slug)}
           className="button button--blue"
         >
           Back to Follow Page
@@ -622,68 +604,168 @@ const FollowSuccessPage = ({ business, onNavigate }) => {
 // ============================================
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('landing');
-  const [businesses, setBusinesses] = useState(mockBusinesses);
-  const [currentBusinessId, setCurrentBusinessId] = useState(null);
+  const [currentBusiness, setCurrentBusiness] = useState(null);
+  const [authToken, setAuthToken] = useState(() => localStorage.getItem('token'));
+  const [publicBusiness, setPublicBusiness] = useState(null);
+  const [publicSlug, setPublicSlug] = useState(null);
+  const [sampleBusinesses, setSampleBusinesses] = useState([]);
+  const [isAuthLoading, setIsAuthLoading] = useState(Boolean(localStorage.getItem('token')));
 
-  const handleNavigate = (screen, businessId = null) => {
+  useEffect(() => {
+    if (!authToken) {
+      setIsAuthLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsAuthLoading(true);
+    getMe()
+      .then((response) => {
+        if (isMounted) {
+          setCurrentBusiness(response.data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          localStorage.removeItem('token');
+          setAuthToken(null);
+          setCurrentBusiness(null);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsAuthLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [authToken]);
+
+  useEffect(() => {
+    const sampleSlugs = ['coffeespot', 'barberstudio'];
+    let isMounted = true;
+
+    Promise.allSettled(sampleSlugs.map((slug) => getBusinessBySlug(slug)))
+      .then((results) => {
+        if (!isMounted) {
+          return;
+        }
+        const validBusinesses = results
+          .filter((result) => result.status === 'fulfilled')
+          .map((result) => result.value.data);
+        setSampleBusinesses(validBusinesses);
+      })
+      .catch(() => {
+        if (isMounted) {
+          setSampleBusinesses([]);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!publicSlug) {
+      return;
+    }
+
+    let isMounted = true;
+    setPublicBusiness(null);
+
+    getBusinessBySlug(publicSlug)
+      .then((response) => {
+        if (isMounted) {
+          setPublicBusiness(response.data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          if (currentBusiness && currentBusiness.slug === publicSlug) {
+            setPublicBusiness(currentBusiness);
+            return;
+          }
+          alert('Business not found.');
+          setCurrentScreen('landing');
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [publicSlug, currentBusiness]);
+
+  const handleNavigate = (screen, slug = null) => {
     setCurrentScreen(screen);
-    if (businessId !== null) {
-      setCurrentBusinessId(businessId);
+    if (screen === 'public' && slug) {
+      setPublicSlug(slug);
     }
   };
 
-  const handleSignup = (newBusiness) => {
-    setBusinesses(prev => [...prev, newBusiness]);
-    setCurrentBusinessId(newBusiness.id);
+  const handleSignup = ({ token, business }) => {
+    setAuthToken(token);
+    setCurrentBusiness(business);
     setCurrentScreen('dashboard');
-    alert('Account created successfully! Add your social links to get started.');
   };
 
-  const handleLogin = (business) => {
-    setCurrentBusinessId(business.id);
+  const handleLogin = ({ token, business }) => {
+    setAuthToken(token);
+    setCurrentBusiness(business);
     setCurrentScreen('dashboard');
   };
 
   const handleUpdateBusiness = (updatedBusiness) => {
-    setBusinesses(prev =>
-      prev.map(b => b.id === updatedBusiness.id ? updatedBusiness : b)
-    );
+    setCurrentBusiness(updatedBusiness);
   };
 
-  const currentBusiness = businesses.find(b => b.id === currentBusinessId);
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setAuthToken(null);
+    setCurrentBusiness(null);
+  };
+
+  const activePublicBusiness = publicBusiness || currentBusiness;
 
   const renderScreen = () => {
     switch (currentScreen) {
       case 'landing':
-        return <LandingPage onNavigate={handleNavigate} />;
+        return <LandingPage onNavigate={handleNavigate} sampleBusinesses={sampleBusinesses} />;
       case 'signup':
         return <BusinessSignup onNavigate={handleNavigate} onSignup={handleSignup} />;
       case 'login':
-        return <BusinessLogin onNavigate={handleNavigate} businesses={businesses} onLogin={handleLogin} />;
+        return <BusinessLogin onNavigate={handleNavigate} onLogin={handleLogin} />;
       case 'dashboard':
         return currentBusiness ? (
           <BusinessDashboard
             business={currentBusiness}
             onNavigate={handleNavigate}
             onUpdateBusiness={handleUpdateBusiness}
+            onLogout={handleLogout}
           />
-        ) : <LandingPage onNavigate={handleNavigate} />;
+        ) : <LandingPage onNavigate={handleNavigate} sampleBusinesses={sampleBusinesses} />;
       case 'public':
-        return currentBusiness ? (
-          <PublicFollowPage business={currentBusiness} onNavigate={handleNavigate} />
-        ) : <LandingPage onNavigate={handleNavigate} />;
+        return activePublicBusiness ? (
+          <PublicFollowPage business={activePublicBusiness} onNavigate={handleNavigate} />
+        ) : <LandingPage onNavigate={handleNavigate} sampleBusinesses={sampleBusinesses} />;
       case 'progress':
-        return currentBusiness ? (
-          <FollowProgressPage business={currentBusiness} onNavigate={handleNavigate} />
-        ) : <LandingPage onNavigate={handleNavigate} />;
+        return activePublicBusiness ? (
+          <FollowProgressPage business={activePublicBusiness} onNavigate={handleNavigate} />
+        ) : <LandingPage onNavigate={handleNavigate} sampleBusinesses={sampleBusinesses} />;
       case 'success':
-        return currentBusiness ? (
-          <FollowSuccessPage business={currentBusiness} onNavigate={handleNavigate} />
-        ) : <LandingPage onNavigate={handleNavigate} />;
+        return activePublicBusiness ? (
+          <FollowSuccessPage business={activePublicBusiness} onNavigate={handleNavigate} />
+        ) : <LandingPage onNavigate={handleNavigate} sampleBusinesses={sampleBusinesses} />;
       default:
-        return <LandingPage onNavigate={handleNavigate} />;
+        return <LandingPage onNavigate={handleNavigate} sampleBusinesses={sampleBusinesses} />;
     }
   };
+
+  if (isAuthLoading) {
+    return <div className="screen screen--purple-blue"></div>;
+  }
 
   return <div>{renderScreen()}</div>;
 }
