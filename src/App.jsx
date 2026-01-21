@@ -3,6 +3,8 @@ import {
   getBusinessBySlug,
   getMe,
   login,
+  requestPasswordReset,
+  resetPassword,
   signup,
   updateSocials,
 } from './services/api';
@@ -288,6 +290,13 @@ const BusinessLogin = ({ onNavigate, onLogin }) => {
             Sign up
           </button>
         </p>
+
+        <p className="helper-text">
+          Forgot your password?{' '}
+          <button onClick={() => onNavigate('forgot-password')} className="text-link">
+            Reset it
+          </button>
+        </p>
       </div>
     </div>
   );
@@ -301,8 +310,27 @@ const BusinessDashboard = ({ business, onNavigate, onUpdateBusiness, onLogout })
   const [tempUrl, setTempUrl] = useState('');
   const socials = business.socials || [];
 
-  const handleCopyLink = () => {
-    alert('Link copied to clipboard!');
+  const handleCopyLink = async () => {
+    const link = `https://followuseverywhere.app/${business.slug}`;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = link;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      alert('Link copied to clipboard!');
+    } catch (error) {
+      console.error('Clipboard copy failed', error);
+      alert('Unable to copy link. Please copy it manually.');
+    }
   };
 
   const handleEdit = (index) => {
@@ -428,6 +456,180 @@ const BusinessDashboard = ({ business, onNavigate, onUpdateBusiness, onLogout })
               </div>
             ))}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// PASSWORD RESET REQUEST
+// ============================================
+const PasswordResetRequest = ({ onNavigate }) => {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!email) {
+      alert('Please enter your email address.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await requestPasswordReset({ email });
+      alert('If that email exists, a reset link has been sent.');
+      onNavigate('login');
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        'Unable to request a password reset right now.';
+      alert(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="screen screen--purple-blue">
+      <div className="card card--medium">
+        <button
+          onClick={() => onNavigate('login')}
+          className="text-link text-link--muted"
+        >
+          ← Back
+        </button>
+
+        <div className="card-header">
+          <h1 className="heading-lg">Reset your password</h1>
+          <p className="text-muted">We’ll email you a reset link.</p>
+        </div>
+
+        <div className="stack">
+          <div className="form-field">
+            <label className="form-label">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="form-input"
+              placeholder="you@business.com"
+            />
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            className="button button--primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// PASSWORD RESET FORM
+// ============================================
+const PasswordResetForm = ({ onNavigate, token: initialToken }) => {
+  const [token, setToken] = useState(initialToken || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!token) {
+      alert('Please enter the reset token.');
+      return;
+    }
+    if (!newPassword) {
+      alert('Please enter a new password.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      alert('Passwords do not match.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await resetPassword({ token, newPassword });
+      alert('Password updated successfully. Please log in.');
+      onNavigate('login');
+    } catch (error) {
+      const message = error.response?.data?.message || 'Unable to reset password.';
+      alert(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="screen screen--purple-blue">
+      <div className="card card--medium">
+        <button
+          onClick={() => onNavigate('login')}
+          className="text-link text-link--muted"
+        >
+          ← Back to login
+        </button>
+
+        <div className="card-header">
+          <h1 className="heading-lg">Choose a new password</h1>
+          <p className="text-muted">Use the token from your email.</p>
+        </div>
+
+        <div className="stack">
+          <div className="form-field">
+            <label className="form-label">
+              Reset Token
+            </label>
+            <input
+              type="text"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              className="form-input"
+              placeholder="Paste your reset token"
+            />
+          </div>
+
+          <div className="form-field">
+            <label className="form-label">
+              New Password
+            </label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="form-input"
+              placeholder="Create a new password"
+            />
+          </div>
+
+          <div className="form-field">
+            <label className="form-label">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="form-input"
+              placeholder="Re-enter new password"
+            />
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            className="button button--primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Updating...' : 'Update Password'}
+          </button>
         </div>
       </div>
     </div>
@@ -610,6 +812,24 @@ export default function App() {
   const [publicSlug, setPublicSlug] = useState(null);
   const [sampleBusinesses, setSampleBusinesses] = useState([]);
   const [isAuthLoading, setIsAuthLoading] = useState(Boolean(localStorage.getItem('token')));
+  const [resetToken, setResetToken] = useState('');
+
+  useEffect(() => {
+    const { pathname, search } = window.location;
+    const searchParams = new URLSearchParams(search);
+    const token = searchParams.get('token') || '';
+
+    if (pathname.startsWith('/b/')) {
+      const slug = pathname.replace('/b/', '').split('/')[0];
+      if (slug) {
+        setPublicSlug(slug);
+        setCurrentScreen('public');
+      }
+    } else if (pathname === '/reset-password') {
+      setResetToken(token);
+      setCurrentScreen('reset-password');
+    }
+  }, []);
 
   useEffect(() => {
     if (!authToken) {
@@ -737,6 +957,10 @@ export default function App() {
         return <BusinessSignup onNavigate={handleNavigate} onSignup={handleSignup} />;
       case 'login':
         return <BusinessLogin onNavigate={handleNavigate} onLogin={handleLogin} />;
+      case 'forgot-password':
+        return <PasswordResetRequest onNavigate={handleNavigate} />;
+      case 'reset-password':
+        return <PasswordResetForm onNavigate={handleNavigate} token={resetToken} />;
       case 'dashboard':
         return currentBusiness ? (
           <BusinessDashboard

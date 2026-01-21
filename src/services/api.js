@@ -20,6 +20,8 @@ api.interceptors.request.use((config) => {
 
 export const signup = (data) => api.post('/auth/signup', data);
 export const login = (data) => api.post('/auth/login', data);
+export const requestPasswordReset = (data) => api.post('/auth/request-password-reset', data);
+export const resetPassword = (data) => api.post('/auth/reset-password', data);
 export const getMe = () => api.get('/auth/me');
 export const updateSocials = (socials) => api.put('/socials', { socials });
 export const getBusinessBySlug = (slug) => api.get(`/businesses/${slug}`);
