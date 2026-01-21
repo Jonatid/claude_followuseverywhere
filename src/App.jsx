@@ -478,7 +478,9 @@ const PasswordResetRequest = ({ onNavigate }) => {
     try {
       setIsSubmitting(true);
       await requestPasswordReset({ email });
-      alert('If that email exists, a reset link has been sent.');
+      alert(
+        'If that email exists, a reset link has been sent. Check your spam folder or wait a few minutes before trying again.'
+      );
       onNavigate('login');
     } catch (error) {
       const message =
@@ -503,6 +505,10 @@ const PasswordResetRequest = ({ onNavigate }) => {
         <div className="card-header">
           <h1 className="heading-lg">Reset your password</h1>
           <p className="text-muted">We’ll email you a reset link.</p>
+          <p className="text-muted">
+            Not seeing the email? Check spam or wait a few minutes before
+            requesting another link.
+          </p>
         </div>
 
         <div className="stack">
