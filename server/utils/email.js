@@ -1,27 +1,25 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT || 587),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: process.env.SMTP_USER
-    ? {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      }
-    : undefined,
-});
+const resend = new Resend(process.env.RESEND_API_KEY || process.env.SMTP_PASS);
 
-export const sendEmail = async ({ to, subject, html, text }) => {
+export async function sendEmail({ to, subject, html }) {
   if (!process.env.EMAIL_FROM) {
-    throw new Error('EMAIL_FROM is not configured');
+    console.error('EMAIL_FROM env var is missing');
+    throw new Error('EMAIL_FROM env var is missing');
   }
 
-  return transporter.sendMail({
-    from: process.env.EMAIL_FROM,
-    to,
-    subject,
-    text,
-    html,
-  });
-};
+  try {
+    const result = await resend.emails.send({
+      from: process.env.EMAIL_FROM,
+      to,
+      subject,
+      html,
+    });
+
+    console.log('Email sent via Resend', result?.id || result);
+    return result;
+  } catch (error) {
+    console.error('Error sending email via Resend', error);
+    throw error;
+  }
+}
